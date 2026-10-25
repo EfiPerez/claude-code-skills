@@ -16,8 +16,8 @@
       "skills": [
         "./skills/done"
       ],
-      "description": "End-of-session wrap-up: detects what changed, updates CLAUDE.md with gotchas only, runs tests, commits and pushes, and prints a short status report.",
-      "version": "1.0.0",
+      "description": "End-of-session wrap-up: detects what changed, updates CLAUDE.md with gotchas only, runs tests, commits only this session's files (creating a repo with a secret check for new projects), and prints a short status report.",
+      "version": "1.1.0",
       "author": {
         "name": "Efi Perez"
       },
@@ -40,7 +40,7 @@
         "./skills/resume-handoff"
       ],
       "description": "Save an unfinished session to a handoffs/ Markdown file (handoff) and pick it back up in a fresh session, with drift checks against the current code (resume-handoff).",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Efi Perez"
       },
