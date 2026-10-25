@@ -129,15 +129,42 @@ Capture the output. Report:
 Do not fix failing tests here — just report them so the user knows what to
 address next session.
 
+## Step 3a — Close the resumed handoff
+
+If **this same conversation** loaded a handoff with `/resume-handoff` (the
+`session-handoff` plugin), set that file's `**Handoff-Status:**` line (directly
+under the H1) to `**Handoff-Status:** complete <date time>` with the real time —
+`date "+%Y-%m-%d %H:%M"` (macOS / Linux / Git Bash) or `Get-Date -Format
+"yyyy-MM-dd HH:mm"` (Windows PowerShell), or the user's preferred date format if
+CLAUDE.md sets one. Insert the line under the H1 if it is missing. Change
+nothing else in the file. If the file has moved (an archiving script may have
+moved it), skip it and say so in the report.
+
+Close **only** the path(s) this conversation itself resumed — you know them from
+your own context. There is no fallback: a session that did not resume a handoff
+marks none complete, not even the newest one, so one session's `/done` can never
+close another session's handoff. A script can then move `complete` handoffs into
+`archive/handoffs/`.
+
 ## Step 4 — Git commit and push
 
-Check if the current project has a git repository:
+**Commit only the files this session changed — never `git add -A` or `git add .`**
+Several sessions often share one working tree, so a blanket add sweeps another
+session's unsaved work into this commit. Use the Step 1 change list
+cross-checked against what this conversation actually edited; a modified file
+you didn't touch stays unstaged and is named in the report.
 
-1. **No `.git` folder** — skip this step entirely and note "No git repository".
+Do this for **every repository this session edited files in**, not only the
+current directory's — a session in one project can still have changed
+`~/.claude` or another project. For each:
+
+1. **No `.git` folder** — if it is a new project folder, create the repository
+   with Step 4a, then continue with item 2. Otherwise skip it and note "No git
+   repository".
 2. **`.git` exists** — run `git status --porcelain` to check for uncommitted changes.
-   - **Nothing to commit** — note "Git: nothing to commit, working tree clean". Still run `git push` in case earlier commits were never pushed.
-   - **Uncommitted changes** — do all three in order:
-     1. `git add -A`
+   - **None of this session's files are modified** — note "Git: nothing to commit". Still run `git push` in case earlier commits were never pushed.
+   - **This session's files are modified** — do all three in order:
+     1. `git add -- <each file this session changed>`, then `git diff --cached --stat` to confirm nothing else is staged
      2. `git commit -m "<message>"` — derive the message from the session summary in Step 1. Use the format: `"<verb> <what>  — session wrap-up"` (e.g. `"Add weekly compliance chart — session wrap-up"`). Keep it under 72 characters.
      3. `git push`
 
@@ -146,6 +173,54 @@ Report the outcome:
 - `Git: ✓ nothing to commit — pushed` — if only a push was needed
 - `Git: ✗ push failed — <error>` — if push errors (show the error)
 - `Git: skipped — no repository` — if no `.git` folder
+- `Left unstaged: <files>` — other changes in the tree this session didn't make
+
+### Step 4a — Create a repository for a new project
+
+A new project folder with no git yet gets a repository, a deny-by-default
+`.gitignore`, and a first commit that has passed a secret check.
+
+**Create one only when all of these hold** — otherwise skip and note why:
+- The folder is a single project's root folder: the session's working
+  directory, or another project folder this session edited. Never the home
+  folder, the Desktop, a folder that holds several projects, or a synced or
+  network drive.
+- `git -C <folder> rev-parse --is-inside-work-tree` fails (not already inside a repo).
+- No subfolder has its own `.git` — a folder that *contains* repos must never
+  become one.
+- There is no `.nogit` file in the folder. That file is the user's opt-out for
+  scratch folders; respect it silently.
+- This session changed files in it.
+
+**Steps, in order — never skip the safety check:**
+1. **`.gitignore`** — if none exists, copy `assets/gitignore-baseline` (in this
+   skill's folder) to `<folder>/.gitignore`. If one exists, append only the
+   baseline lines it is missing; never remove a line.
+2. **Init** — `git init` (uses the user's configured default branch).
+3. **Stage** — `git add -A` is correct *here only*: the repo is brand new, so
+   every file is the project's first version.
+4. **Safety check before the first commit** — run
+   `bash <this skill's folder>/scripts/first-commit-check.sh "<folder>"` (on
+   Windows, from Git Bash). It prints one `<reason>\t<path>` line per staged
+   file that must stay out: spreadsheets, CSVs, databases, key and credential
+   files; non-code files whose name says key/secret/token/credential/password/
+   snapshot/employee/salary/payroll; anything over 5 MB; and any file whose
+   content looks like a key or password. For each line:
+   `git rm --cached -- "<path>"` and add the path to `.gitignore`. Then
+   `git add .gitignore` and re-run the script until it prints nothing **and
+   exits 0**. A non-zero exit means the check itself failed: do not commit —
+   report the error and leave the repo uncommitted. Report removed files by
+   name only — never open or print their contents.
+5. **Commit** — `"Initial commit — <project> — session wrap-up"`.
+6. **Remote** — only if the user's CLAUDE.md defines where new projects get
+   their remote (for example a local bare repo per project as a backup):
+   follow that convention, then `git push -u origin <branch>`. If the target
+   already exists, don't push — it may belong to another project or an old
+   copy; report the name clash and leave the repo local. With no convention
+   defined, leave the repo local and say so.
+
+Report: `Git: ✓ new repository — <N> files committed[, pushed to <remote>| — local only]`,
+plus `Kept out of git: <files>` for anything the safety check removed.
 
 ## Step 5 — Final status report
 
