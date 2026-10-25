@@ -20,8 +20,9 @@ description: >
 ## Run without pausing
 
 Invoking this skill is the user's request to read the handoff folder and its
-files, read the source files the handoff points at, and run read-only git
-commands (`git log`, `git status`). Run through the skill without stopping to
+files, read the source files the handoff points at, run read-only git
+commands (`git log`, `git status`), and edit the loaded handoff's
+`**Handoff-Status:**` line (Step 1). Run through the skill without stopping to
 ask questions. Claude Code's own permission settings still apply: if a tool
 call needs approval under those settings, the harness will prompt for it.
 
@@ -54,6 +55,24 @@ Pick the file:
 
 Don't ask which file to load. Name the file you picked in your report instead,
 so if it's the wrong one the user can see that at a glance and say so.
+
+**Archived handoffs.** If the project moves finished handoffs to
+`<project>/archive/handoffs/`, check there too. If that folder holds a file
+newer (by filename) than the newest one in `handoffs/` — or the file the user
+named is only there — say so and offer it; don't silently fall back to an older
+file. If the user chooses an archived handoff, **move it back to `handoffs/`
+first** (a same-name file already there → stop and ask, never overwrite), then
+continue with it.
+
+**Mark it resumed.** Right after picking the file, set its
+`**Handoff-Status:**` line (directly under the H1) to
+`**Handoff-Status:** resumed <date time>` using the real time — `date
+"+%Y-%m-%d %H:%M"` (macOS / Linux / Git Bash) or `Get-Date -Format
+"yyyy-MM-dd HH:mm"` (Windows PowerShell), or the user's preferred date format
+if CLAUDE.md sets one. If the line is missing (older files), insert it under the
+H1. Change nothing else in the file. Remember this path for the session: an
+end-of-session step that marks handoffs `complete` should close exactly this
+file and no other.
 
 **If no handoffs folder or no files exist**, say so in one line and stop — don't
 invent context or guess at what the last session was doing:
@@ -112,6 +131,9 @@ entirely when the handoff has no **📌 Open Tasks** section — don't print
 so begin the handoff's first Next Step straight after the report. Never end the
 report with "Want me to start there?". Only pause if the drift in Step 3 makes
 the Next Step unsafe or meaningless (for example the file it targets is gone),
-and say why in one line. Next Steps that are irreversible or outward-facing
+and say why in one line. A handoff whose Next Steps or Goal say "wait for the
+user's go" / "don't build until they say go" is already satisfied: running this
+skill is that go, so skip the wait step and start the first real one. Next Steps
+that are irreversible or outward-facing
 (push, deploy, delete) still follow the normal confirmation rules; the go-ahead
 covers starting, not those.
