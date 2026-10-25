@@ -43,7 +43,7 @@ cp -r claude-code-skills/skills/done ~/.claude/skills/
 
 | Skill | Plugin | What it does |
 |---|---|---|
-| `done` | `done` | End-of-session wrap-up: detects what changed, updates CLAUDE.md with gotchas only (not inventories), runs the test suite, commits and pushes, and prints a short status report. |
+| `done` | `done` | End-of-session wrap-up: detects what changed, updates CLAUDE.md with gotchas only (not inventories), runs the test suite, commits only this session's files and pushes, creates a git repository (with a secret check before the first commit) for a new project folder, marks a resumed handoff complete, and prints a short status report. Needs `git`; the new-repository check also needs `bash` (Git Bash on Windows). |
 | `handoff` | `session-handoff` | Saves an unfinished session to `handoffs/YYYY-MM-DD_HH-topic.md`: goal, constraints, current state, gotchas, files to read first, and exact next steps - so a fresh session can continue without re-explaining. |
 | `resume-handoff` | `session-handoff` | Loads the newest handoff in a new session, reads the files it points at, flags anything that changed since (new commits, moved files), and starts the first next step. |
 
