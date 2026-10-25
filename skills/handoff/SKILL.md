@@ -114,11 +114,19 @@ date format (check CLAUDE.md for a date convention); default to
 
 ## Step 5 — Write the document
 
+The `**Handoff-Status:**` line directly under the H1 is a machine-readable
+lifecycle marker: `open` here, `resumed <date time>` once `resume-handoff` loads
+it, and `complete <date time>` if your end-of-session step marks the work
+finished. A script can read it, for example to move completed handoffs into
+`archive/handoffs/`. Always write it exactly as `open` — never invent another
+value.
+
 Use this structure. The next session (and the `resume-handoff` skill) looks for
 these headings by name, so keep them as-is even when a section is thin:
 
 ```markdown
 # Session Handoff: [Brief Topic]
+**Handoff-Status:** open
 **Date & Time:** [YYYY-MM-DD HH:MM, or the user's preferred date format]
 
 ## 🎯 Goal
@@ -180,6 +188,14 @@ Strong: `1. Update the three validateToken() call sites in
 [routes/api.js](routes/api.js) (lines 22, 48, 91) to read req.user from the
 returned payload. 2. Run npm test -- auth.test.js; the "rejects expired token"
 case is expected to fail until step 1 lands.`
+
+**Never write "wait for the user's go" as a Next Step, Goal or Constraint.**
+Running `/resume-handoff` *is* the go, so a wait step makes the next session
+stall for approval the user already gave. If the work is a plan or design the
+user hasn't signed off yet, record that as state ("design reviewed, nothing
+built yet") and make step 1 the first real build action. Real gates (push,
+deploy, delete, spending budget the user said is exhausted) are still worth
+naming — on the step they guard, not as a blanket wait.
 
 If the "Files to Review on Resume" list would be more than four files, you're
 probably listing everything you touched rather than the few files that *orient*
