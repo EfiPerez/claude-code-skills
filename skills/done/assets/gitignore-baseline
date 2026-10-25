@@ -1,0 +1,83 @@
+# Baseline written by /done when it creates a new repository.
+# Default-deny for anything that could hold a secret or employee data.
+# To commit one of these on purpose, add a !negation line below - never delete a rule.
+
+# Secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+*.jks
+*.keystore
+*.kdbx
+*.ppk
+*.ovpn
+*.tfstate
+*.tfvars
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+.npmrc
+.pypirc
+.netrc
+.git-credentials
+.htpasswd
+.pgpass
+credentials.json
+*-sa.json
+.streamlit/secrets.toml
+
+# Databases, data snapshots and personal data (PII)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.duckdb
+*.mdb
+*.accdb
+*.sql
+*.dump
+*.bak
+*.parquet
+*.feather
+*.pkl
+*.pickle
+*.sav
+*.dta
+data/
+*.xlsx
+*.xlsm
+*.xlsb
+*.xls
+*.ods
+*.csv
+*.tsv
+~$*
+
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Deploy artifacts - rebuilt on demand, never committed
+*.zip
+*.tar.gz
+*.7z
+
+# Local run noise
+*.log
+*.pid
+.DS_Store
+Thumbs.db
