@@ -84,9 +84,23 @@ part of the handoff:
 
 ## Step 3 — Destination
 
-Always the current working directory: `<cwd>/handoffs/`. Create the folder if it
-doesn't exist. Don't ask, don't search for a "better" project root — predictable
-beats clever, and the user can move the file if they want it elsewhere.
+Always the **session's project folder** — the folder the chat was opened in:
+`<project>/handoffs/`. Create the folder if it doesn't exist. Don't ask, don't
+search for a "better" project root — predictable beats clever, and the user can
+move the file if they want it elsewhere.
+
+**Never write a handoff into the global `~/.claude` folder** (or anything inside
+it), even when the session's work edited skills, plugins or settings there.
+`/resume-handoff` is run from the project folder and looks only there, so a
+handoff written under `~/.claude` is effectively lost.
+
+The shell's current directory is not a safe guide: a `cd` in an earlier command
+can leave it inside `~/.claude` or a skill folder. Use the folder the session
+started in (the first "Primary working directory", also encoded in the
+`~/.claude/projects/<slug>/` transcript path). If that folder itself is inside
+`~/.claude`, ask the user which project folder to use — that is the one case
+where asking beats guessing.
+
 
 ## Step 4 — Name the file
 
