@@ -1,5 +1,9 @@
 # Changelog
 
+## [session-handoff 1.2.0] - 2026-11-01
+### Changed
+- `handoff` now always writes to the session's project folder, never into the global `~/.claude` folder (the shell's current directory can drift there after a `cd`)
+
 ## [done 1.1.0] - 2026-10-21
 ### Added
 - `done` - creates a git repository for a new project folder: a deny-by-default `.gitignore` (`assets/gitignore-baseline`) and a secret/PII check (`scripts/first-commit-check.sh`) that must pass before the first commit; adds a remote only if your CLAUDE.md defines a convention for it
