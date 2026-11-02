@@ -1,8 +1,14 @@
 # Changelog
 
+## [codec-loop 1.0.0] - 2026-11-01
+### Added
+- `codec-loop` - two skills installed together: `codec-review` runs a bounded adversarial review loop between Claude and OpenAI Codex over a plan, document or codebase (Codex critiques read-only, Claude judges and rewrites, one Codex thread, 5-round cap); `codec-build` hands a frozen spec to a second model to implement and runs a bounded review-and-fix loop over the diff, with a clean-tree or snapshot gate and a commit gate. Works on Windows (PowerShell) and macOS/Linux (bash; macOS untested). Needs the Codex CLI and `codex login`; without them, both skills offer an opt-in same-family mode (a different Claude model as critic — weaker, still independent). See the README prerequisites and Privacy section
+- `codec-review` bundles `references/codec-loop.md` (shared mechanics and failure playbook), `references/review-output.schema.json` and `references/troubleshooting.md`; `codec-build` links to them
+- `NOTICE` and `LICENSES/Apache-2.0.txt`: the loop design is adapted from `chaseai-yt/claudex-loop` (MIT), and two reference files are derived from the OpenAI Codex plugin (Apache-2.0, modified)
+
 ## [session-handoff 1.2.0] - 2026-11-01
 ### Changed
-- `handoff` now always writes to the session's project folder, never into the global `~/.claude` folder (the shell's current directory can drift there after a `cd`)
+- `handoff` - now always writes to the session's project folder, never into the global `~/.claude` folder (the shell's current directory can drift there after a `cd`)
 
 ## [done 1.1.0] - 2026-10-21
 ### Added
