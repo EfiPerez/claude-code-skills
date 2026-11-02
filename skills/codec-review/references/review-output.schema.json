@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "codec-review adversarial round output. Derived from the OpenAI Codex plugin schemas/review-output.schema.json (Apache-2.0, Copyright 2026 OpenAI) and modified; see NOTICE and LICENSES/Apache-2.0.txt in the repository root.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "summary", "findings", "next_steps", "settled"],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["approved", "revise"],
+      "description": "approved = sound enough to implement as written. revise = at least one material problem remains. Never approve to be agreeable."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One paragraph: the strongest remaining reason this should not ship, or why it is now sound."
+    },
+    "findings": {
+      "type": "array",
+      "description": "Material findings only. No style, naming, or low-value cleanup. Empty array when verdict is approved.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "title", "what_breaks", "why_vulnerable", "impact", "recommendation", "confidence", "file", "line_start", "line_end", "prior_round_response"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable short id, e.g. F1, F2. Reuse the same id across rounds when re-raising the same finding."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"]
+          },
+          "title": {
+            "type": "string"
+          },
+          "what_breaks": {
+            "type": "string",
+            "description": "The concrete failure: inputs or state, then the wrong outcome."
+          },
+          "why_vulnerable": {
+            "type": "string",
+            "description": "Why this specific code path or plan step admits that failure. Cite evidence you actually read."
+          },
+          "impact": {
+            "type": "string",
+            "description": "Likely blast radius: data loss, auth bypass, silent corruption, downtime, cost."
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "One concrete change that reduces the risk."
+          },
+          "confidence": {
+            "type": "number",
+            "description": "Calibrated confidence from 0 to 1 that this finding is real. Do not inflate."
+          },
+          "file": {
+            "type": "string",
+            "description": "Repo-relative file path, or the reviewed document's path, or the plan section heading when the finding is not file-anchored."
+          },
+          "line_start": {
+            "type": ["integer", "null"],
+            "description": "First relevant line, or null when the finding is not line-anchored."
+          },
+          "line_end": {
+            "type": ["integer", "null"],
+            "description": "Last relevant line, or null when the finding is not line-anchored."
+          },
+          "prior_round_response": {
+            "type": ["string", "null"],
+            "description": "On re-review only: why the builder's response to this finding in an earlier round was insufficient. Null on first sighting."
+          }
+        }
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Ordered, concrete actions. Empty array when verdict is approved."
+    },
+    "settled": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Ids of findings from earlier rounds you now consider resolved. Do not re-litigate these. Empty array in round 1."
+    }
+  }
+}
