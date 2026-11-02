@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Practical Claude Code skills for real workflows",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "plugins": [
     {
@@ -52,6 +52,30 @@
         "context",
         "resume",
         "continuity"
+      ]
+    },
+    {
+      "name": "codec-loop",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/codec-review",
+        "./skills/codec-build"
+      ],
+      "description": "Adversarial review and build loops between Claude and OpenAI Codex: codec-review has Codex critique a plan or codebase read-only while Claude judges and rewrites; codec-build hands a frozen spec to a second model to implement, then runs a bounded review-and-fix loop over the diff. Needs the Codex CLI and codex login; without them, an opt-in same-family mode uses a different Claude model as the critic (weaker, still independent). Windows and macOS (macOS untested).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Efi Perez"
+      },
+      "license": "MIT",
+      "category": "workflow",
+      "keywords": [
+        "codex",
+        "review",
+        "adversarial",
+        "build",
+        "second-opinion",
+        "plan"
       ]
     }
   ]
