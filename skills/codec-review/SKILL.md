@@ -372,7 +372,8 @@ one-line reason. **A rejection cites a `file:line` or a test result, not an asse
 escalation as a rejection is how a real risk becomes invisible. Prose essays per finding are
 how a run gets expensive; the reason is one sentence.
 
-**6. Rewrite the working copy**, append the round row, increment.
+**6. Rewrite the working copy**, append the round row, increment. If the plan-review mod
+started this run, renew its record now (Step 6).
 
 ### Why rewriting is the whole trick
 
@@ -419,7 +420,9 @@ tr '\n' ' ' < "$file" | tr -s ' ' | grep -o "the phrase you superseded"
   or an open finding is `high`; recommend stopping when the count is flat across two rounds,
   since that means the loop is re-litigating rather than converging. Log the answer as a human
   override. If the user declines, go to Step 5 with `status: deadlock-cap-reached`.
-- **Error or `unparsed`** → stop and surface it. `unparsed` is never an approval.
+- **Error or `unparsed`** → stop and surface it. `unparsed` is never an approval. If the
+  plan-review mod started this run, remove its record entry (Step 6) so the next approval asks
+  for a review again.
 
 Say which kind of deadlock it is: *cap-reached* and *irreconcilable* mean different things, and
 only the second implies the two models actually disagree.
@@ -434,7 +437,8 @@ No sign-off question: after the cap question, Claude decides and that is it.
 2. **If the target is a plan** and a `handoff` skill is installed (the `session-handoff` plugin
    from this marketplace provides one), append "Run the handoff skill" as its final task, in
    prose. No `handoff` skill installed → skip this step.
-3. **Write the report** (below). Set `status`, release the lock.
+3. **Write the report** (below). Set `status`, release the lock. If the plan-review mod started
+   this run, mark its record `reviewed` (Step 6) — on convergence and on deadlock alike.
 4. **Say one line in the conversation:** the verdict, the round count, and the report path.
    Nothing else. If a `high` finding is unresolved, add one sentence naming it.
 
@@ -472,6 +476,50 @@ One row per *topic*, not per finding — three rounds arguing the same rule is o
 is `Fixed — <what changed>`, `Open — <why>`, or `Rejected — <evidence>`. No round numbers, no
 finding ids, no Codex quotes. The full per-round record, with Codex's raw final message at a
 deadlock, stays in the run log for whoever needs to reopen a decision.
+
+## Step 6 — When the plan-review mod started the run
+
+The optional `plan-review` mod (`/plugin install plan-review@efi-mods`, from the
+`EfiPerez/claude-code-mods` marketplace) saves each plan you approve in plan mode to
+`plans/<slug>.md` and asks for this skill with that **absolute** path. On Windows it also keeps
+a review record, `plans/.codec-reviewed.json`, keyed by the SHA-256 of the saved plan, so an
+unchanged plan is not reviewed twice. Its entry stays `reviewing` only while a 20-minute lease
+is live — so this skill must keep that lease alive, and close the entry when it finishes.
+
+- Use the path verbatim; skip the scope question. Never call `ExitPlanMode`, and never begin
+  implementing the plan you just reviewed.
+- `target_sha256` (Step 2) must be the SHA-256 of the plan file's raw bytes, taken **before**
+  Step 5 overwrites it — that is the record's key.
+- Update the record with the bundled helper, at three points:
+
+  | When | Action |
+  |---|---|
+  | Start of the run, then after every round (Step 3.6) | `renew` |
+  | Step 5.3, converged or deadlocked | `reviewed` |
+  | Error, `unparsed`, or the run is abandoned | `remove` |
+
+  PowerShell:
+
+  ```powershell
+  $SKILL_DIR = '<SKILL_DIR>'; $plan = '<absolute plan path>'
+  $hash = (Get-FileHash -LiteralPath $plan -Algorithm SHA256).Hash.ToLower()   # Step 2 only
+  node (Join-Path $SKILL_DIR 'scripts/plan-record.mjs') renew $plan $hash
+  ```
+
+  bash:
+
+  ```bash
+  SKILL_DIR='<SKILL_DIR>'; plan='<absolute plan path>'
+  hash=$(shasum -a 256 "$plan" | cut -d' ' -f1)   # Step 2 only
+  node "$SKILL_DIR/scripts/plan-record.mjs" renew "$plan" "$hash"
+  ```
+
+  Replace `renew` with `reviewed` or `remove` as the table says, always passing the
+  `target_sha256` from Step 2. It prints one word. `no-record` is normal: the mod did not start
+  this run (or runs where it keeps no record), so there is nothing to update. `locked` (exit 2)
+  means another approval held the record for about 10 seconds: retry once, and if it is still
+  locked, mention it in the report — the lease expires on its own, and the next approval of
+  the same plan then asks for a review again.
 
 ## References
 
