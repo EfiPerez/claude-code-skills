@@ -1,5 +1,11 @@
 # Changelog
 
+## [codec-loop 1.1.0] - 2026-11-04
+### Added
+- `codec-review` - works with the new `plan-review` mod (`EfiPerez/claude-code-mods`): when the mod starts a review of an approved plan, `codec-review` keeps the mod's review record up to date with the bundled `scripts/plan-record.mjs` (renews its lease every round, marks the plan `reviewed` at the end, removes it on abort), so an unchanged plan is not reviewed twice. Without the mod nothing changes
+### Changed
+- README - recommends the `plan-review` mod as an optional companion
+
 ## [codec-loop 1.0.0] - 2026-11-01
 ### Added
 - `codec-loop` - two skills installed together: `codec-review` runs a bounded adversarial review loop between Claude and OpenAI Codex over a plan, document or codebase (Codex critiques read-only, Claude judges and rewrites, one Codex thread, 5-round cap); `codec-build` hands a frozen spec to a second model to implement and runs a bounded review-and-fix loop over the diff, with a clean-tree or snapshot gate and a commit gate. Works on Windows (PowerShell) and macOS/Linux (bash; macOS untested). Needs the Codex CLI and `codex login`; without them, both skills offer an opt-in same-family mode (a different Claude model as critic — weaker, still independent). See the README prerequisites and Privacy section
