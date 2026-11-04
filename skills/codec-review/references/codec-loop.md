@@ -565,7 +565,7 @@ A bare `git diff --no-index <snapshot> <worktree>` is **not** a valid completion
 
 A lock is **transient and released**. It stops two runs racing in one project, lives at `adversarial-review/.lock` for one run, and is released on **every** terminal path, including error and deadlock.
 
-(An earlier design also had a persistent "plan sentinel" for a plan-approval hook that auto-started reviews. That hook is not part of this package, so the sentinel is not included.)
+The run lock is not the plan-review record. The optional `plan-review` mod keeps a **persistent** record, `plans/.codec-reviewed.json`, keyed by the SHA-256 of the approved plan (a re-approved unchanged plan lands at a new timestamped path, so a path key would miss it). An entry is `reviewing` only while its lease is live: a lease, not a lock file or a log status, is the only evidence a review is still running, because both of those survive a crash. `codec-review` renews the lease every round, marks the entry `reviewed` at the end, and removes it on abort, using `scripts/plan-record.mjs` (SKILL.md Step 6). If `codec-review` never starts, the lease expires and the next approval asks again; that is the intended failure mode.
 
 Use exclusive create, never check-then-write. The lock stores the owner `run_id`; liveness of a *round* is decided by the attempt nonce (§6), because the pid of a short-lived tool shell says nothing. PowerShell:
 
