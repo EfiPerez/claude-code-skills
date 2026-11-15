@@ -520,6 +520,9 @@ is live — so this skill must keep that lease alive, and close the entry when i
   means another approval held the record for about 10 seconds: retry once, and if it is still
   locked, mention it in the report — the lease expires on its own, and the next approval of
   the same plan then asks for a review again.
+- `reviewed` is final. A `renew` on a `reviewed` entry changes nothing and leaves it closed, so
+  the same plan content is never reviewed twice. Only a changed plan (a new hash) gets a new
+  review.
 
 ## References
 
