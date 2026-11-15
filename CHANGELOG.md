@@ -1,5 +1,9 @@
 # Changelog
 
+## [codec-loop 1.1.1] - 2026-11-11
+### Changed
+- `codec-review` - Step 6 now states that a `reviewed` plan stays closed: a later `renew` changes nothing, so the same plan content is never reviewed twice; only a changed plan gets a new review. Documentation only; `scripts/plan-record.mjs` already behaved this way
+
 ## [codec-loop 1.1.0] - 2026-11-04
 ### Added
 - `codec-review` - works with the new `plan-review` mod (`EfiPerez/claude-code-mods`): when the mod starts a review of an approved plan, `codec-review` keeps the mod's review record up to date with the bundled `scripts/plan-record.mjs` (renews its lease every round, marks the plan `reviewed` at the end, removes it on abort), so an unchanged plan is not reviewed twice. Without the mod nothing changes
